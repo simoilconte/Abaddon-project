@@ -1,4 +1,6 @@
-# Healthcare Ticket System
+# Abaddon Project - Healthcare Ticket System
+
+**Heresy project against the system** 🔥
 
 Sistema di gestione ticket altamente personalizzato per un network di cliniche sanitarie.
 
