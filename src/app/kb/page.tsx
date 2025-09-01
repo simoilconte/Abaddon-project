@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { useRole } from '@/providers/RoleProvider';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -17,12 +18,6 @@ import {
   Plus,
   ArrowRight
 } from 'lucide-react';
-
-const mockUser = {
-  name: 'Dr. Mario Rossi',
-  email: 'mario.rossi@clinica.it',
-  clinic: 'Clinica San Giuseppe'
-};
 
 const kbArticles = [
   {
@@ -85,6 +80,7 @@ const kbArticles = [
 const categories = ['Tutti', 'Account', 'Hardware', 'Software', 'Rete', 'Sicurezza'];
 
 export default function KnowledgeBasePage() {
+  const { user } = useRole();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tutti');
   const [sortBy, setSortBy] = useState('popular');
@@ -106,7 +102,7 @@ export default function KnowledgeBasePage() {
   const featuredArticles = kbArticles.filter(article => article.featured);
 
   return (
-    <AppLayout user={mockUser} userRole="user">
+    <AppLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

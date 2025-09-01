@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
+import { useRole } from '@/providers/RoleProvider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -17,17 +18,10 @@ import {
   Eye,
   MessageSquare,
   Calendar,
-  TrendingUp,
   Users,
   Activity
 } from 'lucide-react'
 import Link from 'next/link'
-
-const mockUser = {
-  name: 'Dr. Mario Rossi',
-  email: 'mario.rossi@clinica.it',
-  clinic: 'Clinica San Giuseppe'
-}
 
 const mockTickets = [
   {
@@ -113,11 +107,12 @@ const priorityLabels = {
 }
 
 export default function DashboardPage() {
+  const { user } = useRole()
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
 
-  const myTickets = mockTickets.filter(ticket => 
-    ticket.assignee === 'Te' || ticket.assignee === mockUser.name
+  const myTickets = mockTickets.filter(ticket =>
+    ticket.assignee === 'Te' || ticket.assignee === user.name
   )
   
   const clinicTickets = mockTickets.filter(ticket => 
@@ -147,14 +142,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <AppLayout user={mockUser} userRole="agent">
+    <AppLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600">
-              Benvenuto, {mockUser.name} • {mockUser.clinic}
+              Benvenuto, {user.name} • {user.clinic}
             </p>
           </div>
           <div className="flex gap-3">
@@ -173,76 +168,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                I miei ticket
-              </CardTitle>
-              <Ticket className="h-5 w-5 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{myTickets.length}</div>
-              <p className="text-xs text-green-600 flex items-center mt-1">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +2 da ieri
-              </p>
-            </CardContent>
-          </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                In scadenza SLA
-              </CardTitle>
-              <Clock className="h-5 w-5 text-yellow-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">
-                {mockTickets.filter(t => t.sla === 'warning').length}
-              </div>
-              <p className="text-xs text-yellow-600 flex items-center mt-1">
-                <AlertTriangle className="h-3 w-3 mr-1" />
-                Richiede attenzione
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Risolti oggi
-              </CardTitle>
-              <CheckCircle className="h-5 w-5 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">8</div>
-              <p className="text-xs text-green-600 flex items-center mt-1">
-                <Activity className="h-3 w-3 mr-1" />
-                +3 rispetto a ieri
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-md transition-shadow border-red-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                SLA scaduti
-              </CardTitle>
-              <AlertCircle className="h-5 w-5 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {mockTickets.filter(t => t.sla === 'overdue').length}
-              </div>
-              <p className="text-xs text-red-600 flex items-center mt-1">
-                <AlertCircle className="h-3 w-3 mr-1" />
-                Azione immediata richiesta
-              </p>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Urgent Tickets Alert */}
         {urgentTickets.length > 0 && (

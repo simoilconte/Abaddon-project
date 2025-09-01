@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bell, Search, User, Menu, X } from 'lucide-react';
+import { Bell, Search, User, Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { useRole } from '@/providers/RoleProvider';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -15,8 +16,10 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, user }: HeaderProps) {
+  const { role, setRole } = useRole();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const notifications = [
     {
@@ -47,6 +50,17 @@ export function Header({ onMenuClick, user }: HeaderProps) {
 
   const unreadCount = notifications.filter(n => n.unread).length;
 
+  const roles = [
+    { key: 'user', label: 'Utente', description: 'Gestione ticket personali' },
+    { key: 'agent', label: 'Agente', description: 'Gestione ticket utenti e clinica' },
+    { key: 'admin', label: 'Admin', description: 'Amministrazione completa' }
+  ] as const;
+
+  const handleRoleChange = (newRole: typeof role) => {
+    setRole(newRole);
+    setShowRoleMenu(false);
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3 relative">
       <div className="flex items-center justify-between">
@@ -72,8 +86,63 @@ export function Header({ onMenuClick, user }: HeaderProps) {
           </div>
         </div>
 
-        {/* Right side - Notifications and user menu */}
+        {/* Right side - Role selector, notifications and user menu */}
         <div className="flex items-center space-x-3">
+          {/* Role Selector */}
+          <div className="relative">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center space-x-2"
+              onClick={() => setShowRoleMenu(!showRoleMenu)}
+            >
+              <span className="text-sm font-medium">
+                {roles.find(r => r.key === role)?.label || 'Utente'}
+              </span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+
+            {/* Role Dropdown */}
+            {showRoleMenu && (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <div className="p-3 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-900">Seleziona Ruolo</h3>
+                    <Button variant="ghost" size="sm" onClick={() => setShowRoleMenu(false)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="py-2">
+                  {roles.map((roleOption) => (
+                    <button
+                      key={roleOption.key}
+                      onClick={() => handleRoleChange(roleOption.key)}
+                      className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${
+                        role === roleOption.key ? 'bg-blue-50 border-r-2 border-blue-600' : ''
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">{roleOption.label}</p>
+                          <p className="text-sm text-gray-600">{roleOption.description}</p>
+                        </div>
+                        {role === roleOption.key && (
+                          <div className="w-2 h-2 bg-blue-600 rounded-full" />
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <div className="p-3 border-t border-gray-200">
+                  <p className="text-xs text-gray-500">
+                    Usa questo menu per testare i diversi ruoli durante lo sviluppo
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Notifications */}
           <div className="relative">
             <Button 
@@ -195,12 +264,13 @@ export function Header({ onMenuClick, user }: HeaderProps) {
       </div>
 
       {/* Click outside to close dropdowns */}
-      {(showNotifications || showUserMenu) && (
-        <div 
-          className="fixed inset-0 z-40" 
+      {(showNotifications || showUserMenu || showRoleMenu) && (
+        <div
+          className="fixed inset-0 z-40"
           onClick={() => {
             setShowNotifications(false);
             setShowUserMenu(false);
+            setShowRoleMenu(false);
           }}
         />
       )}

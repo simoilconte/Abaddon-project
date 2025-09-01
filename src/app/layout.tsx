@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/providers/ConvexProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { RoleProvider } from "@/providers/RoleProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,7 +25,9 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <AuthProvider>
           <ConvexClientProvider>
-            {children}
+            <RoleProvider>
+              {children}
+            </RoleProvider>
           </ConvexClientProvider>
         </AuthProvider>
       </body>

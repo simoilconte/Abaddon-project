@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { useRole } from '@/providers/RoleProvider';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -10,12 +11,6 @@ import { Select } from '@/components/ui/Select';
 import { Badge } from '@/components/ui/Badge';
 import { ArrowLeft, Upload, User, Tag } from 'lucide-react';
 import Link from 'next/link';
-
-const mockUser = {
-  name: 'Dr. Mario Rossi',
-  email: 'mario.rossi@clinica.it',
-  clinic: 'Clinica San Giuseppe'
-};
 
 const categories = [
   { value: 'tech-support', label: 'Supporto Tecnico' },
@@ -33,6 +28,7 @@ const priorities = [
 ];
 
 export default function NewTicketPage() {
+  const { user } = useRole();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -56,7 +52,7 @@ export default function NewTicketPage() {
   };
 
   return (
-    <AppLayout user={mockUser} userRole="user">
+    <AppLayout>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4">
@@ -155,8 +151,8 @@ export default function NewTicketPage() {
                   <div className="flex items-center space-x-2">
                     <User className="h-4 w-4 text-gray-500" />
                     <div>
-                      <p className="text-sm font-medium">{mockUser.name}</p>
-                      <p className="text-xs text-gray-500">{mockUser.clinic}</p>
+                      <p className="text-sm font-medium">{user.name}</p>
+                      <p className="text-xs text-gray-500">{user.clinic}</p>
                     </div>
                   </div>
                   

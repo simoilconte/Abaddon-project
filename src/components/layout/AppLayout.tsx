@@ -4,18 +4,14 @@ import React, { useState } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { NotificationCenter } from './NotificationCenter';
+import { useRole } from '@/providers/RoleProvider';
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  userRole?: 'user' | 'agent' | 'admin';
-  user?: {
-    name: string;
-    email: string;
-    clinic: string;
-  };
 }
 
-export function AppLayout({ children, userRole = 'user', user }: AppLayoutProps) {
+export function AppLayout({ children }: AppLayoutProps) {
+  const { role, user } = useRole();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleMenuClick = () => {
@@ -29,16 +25,16 @@ export function AppLayout({ children, userRole = 'user', user }: AppLayoutProps)
   return (
     <div className="h-screen flex overflow-hidden bg-gray-50">
       {/* Sidebar */}
-      <Sidebar 
-        isOpen={sidebarOpen} 
+      <Sidebar
+        isOpen={sidebarOpen}
         onClose={handleSidebarClose}
-        userRole={userRole}
+        userRole={role}
       />
 
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden lg:ml-0">
         {/* Header */}
-        <Header 
+        <Header
           onMenuClick={handleMenuClick}
           user={user}
         />
