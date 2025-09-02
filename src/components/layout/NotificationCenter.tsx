@@ -32,29 +32,14 @@ const notificationStyles = {
 export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  // Simulated notifications for demo
+  // Durante lo sviluppo disabilitiamo le notifiche demo
   useEffect(() => {
-    const demoNotifications: Notification[] = [
-      {
-        id: '1',
-        type: 'info',
-        title: 'Nuovo ticket assegnato',
-        message: 'Ti è stato assegnato il ticket #1234 - Problema sistema',
-        timestamp: Date.now(),
-        autoClose: true,
-        duration: 5000,
-      },
-      {
-        id: '2',
-        type: 'warning',
-        title: 'SLA in scadenza',
-        message: 'Il ticket #1230 scadrà tra 2 ore',
-        timestamp: Date.now() - 60000,
-        autoClose: false,
-      },
-    ];
-
-    setNotifications(demoNotifications);
+    if (process.env.NODE_ENV === 'production') {
+      const demoNotifications: Notification[] = [];
+      setNotifications(demoNotifications);
+    } else {
+      setNotifications([]);
+    }
   }, []);
 
   const removeNotification = (id: string) => {
