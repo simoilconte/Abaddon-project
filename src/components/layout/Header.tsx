@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bell, Search, User, Menu, X, ChevronDown } from 'lucide-react';
+import { Bell, Search, User, Menu, X, ChevronDown, Home as HomeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useRole } from '@/providers/RoleProvider';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -20,6 +22,7 @@ export function Header({ onMenuClick, user }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
+  const pathname = usePathname();
 
   const notifications = [
     {
@@ -74,6 +77,15 @@ export function Header({ onMenuClick, user }: HeaderProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
+
+          {pathname !== '/' && (
+            <Link href="/">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <HomeIcon className="h-4 w-4" />
+                Home
+              </Button>
+            </Link>
+          )}
           
           <div className="hidden md:block">
             <div className="relative">

@@ -91,7 +91,7 @@ export const createUser = mutation({
   args: {
     email: v.string(),
     name: v.string(),
-    clinicId: v.id("clinics"),
+    clinicId: v.optional(v.id("clinics")),
     roleId: v.id("roles"),
     auth0Id: v.string(),
     preferences: v.optional(v.object({
@@ -135,10 +135,36 @@ export const createUser = mutation({
       throw new ConvexError("User with this Auth0 ID already exists")
     }
     
-    // Verifica che la clinica esista
-    const clinic = await ctx.db.get(args.clinicId)
-    if (!clinic) {
-      throw new ConvexError("Clinic not found")
+    // Risolvi la clinica: se non passata, prova con DEMO001 (creala se manca)
+    let clinicId = args.clinicId
+    if (!clinicId) {
+      const defaultClinic = await ctx.db
+        .query("clinics")
+        .withIndex("by_code", (q) => q.eq("code", "DEMO001"))
+        .unique()
+      if (!defaultClinic) {
+        // Crea automaticamente una clinica di default se non esiste
+        clinicId = await ctx.db.insert("clinics", {
+          name: "Clinica Esempio",
+          code: "DEMO001",
+          address: "Via Roma 123, Milano",
+          phone: "+39 02 1234567",
+          email: "info@clinicaesempio.it",
+          settings: {
+            allowPublicTickets: true,
+            requireApprovalForCategories: false,
+            defaultSlaHours: 24,
+          },
+          isActive: true,
+        })
+      } else {
+        clinicId = defaultClinic._id
+      }
+    } else {
+      const clinic = await ctx.db.get(clinicId)
+      if (!clinic) {
+        throw new ConvexError("Clinic not found")
+      }
     }
     
     // Verifica che il ruolo esista
@@ -151,7 +177,7 @@ export const createUser = mutation({
     const userId = await ctx.db.insert("users", {
       email: args.email,
       name: args.name,
-      clinicId: args.clinicId,
+      clinicId,
       roleId: args.roleId,
       auth0Id: args.auth0Id,
       isActive: true,
@@ -335,5 +361,26 @@ export const getUserStats = query({
       inactive: inactiveUsers.length,
       byRole: Object.fromEntries(roleStats)
     }
+  }
+})
+
+// Query per ottenere tutti gli utenti (opzionale filtro per clinica)
+export const getAllUsers = query({
+  args: { clinicId: v.optional(v.id("clinics")) },
+  handler: async (ctx, { clinicId }) => {
+    let users
+    if (clinicId) {
+      users = await ctx.db
+        .query("users")
+        .withIndex("by_clinic", (q) => q.eq("clinicId", clinicId))
+        .collect()
+    } else {
+      users = await ctx.db.query("users").collect()
+    }
+
+    const withRole = await Promise.all(
+      users.map(async (u) => ({ ...u, role: await ctx.db.get(u.roleId) }))
+    )
+    return withRole
   }
 })

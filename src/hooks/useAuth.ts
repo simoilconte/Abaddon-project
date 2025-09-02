@@ -1,45 +1,54 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useAuth as useAuthContext } from '@/providers/AuthProvider'
 
-// Mock authentication per testing UI
+// Re-export del hook dall'AuthProvider
 export function useAuth() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  
-  // Mock user data
-  const mockUser = {
-    id: 'mock-user-1',
-    email: 'mario.rossi@clinica.it',
-    name: 'Dr. Mario Rossi',
-    clinic: 'Clinica San Giuseppe',
-    role: 'agent'
-  }
-
-  useEffect(() => {
-    // Simula caricamento autenticazione
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-      // Per ora sempre autenticato per testare l'UI
-      setIsAuthenticated(true)
-    }, 1000)
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  return {
-    user: isAuthenticated ? mockUser : null,
-    isAuthenticated,
-    isLoading,
-    error: null,
-  }
+  return useAuthContext()
 }
 
 export function usePermissions() {
+  const { user } = useAuth()
+  
   return {
-    checkPermission: (_resource: string, _action: string, _targetId?: string) => {
-      // Per ora ritorna sempre true per testare l'UI
-      return true
+    checkPermission: (resource: string, action: string, targetId?: string) => {
+      if (!user) return false
+      
+      const permissions = user.roleDetails?.permissions || []
+      
+      // Logica di controllo permessi semplificata
+      switch (user.role) {
+        case 'admin':
+          return true // Admin può fare tutto
+        case 'agent':
+          return permissions.some(p => 
+            p.includes('clinic:') || 
+            p.includes('tickets:') ||
+            (p.includes('own:') && targetId === user.id)
+          )
+        case 'user':
+          return permissions.some(p => 
+            p.includes('own:') && targetId === user.id ||
+            p.includes('tickets:create')
+          )
+        default:
+          return false
+      }
+    },
+    
+    canAccess: (area: 'dashboard' | 'tickets' | 'users' | 'settings') => {
+      if (!user) return false
+      
+      switch (user.role) {
+        case 'admin':
+          return true
+        case 'agent':
+          return ['dashboard', 'tickets'].includes(area)
+        case 'user':
+          return ['dashboard', 'tickets'].includes(area)
+        default:
+          return false
+      }
     }
   }
 }

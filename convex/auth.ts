@@ -23,6 +23,22 @@ export const getOrCreateUser = mutation({
       })
       return existingUser
     }
+
+    // Se non trovato per auth0Id, prova ad associare per email (per utenti creati manualmente)
+    const userByEmail = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique()
+
+    if (userByEmail) {
+      await ctx.db.patch(userByEmail._id, {
+        auth0Id,
+        name: userByEmail.name || name,
+        lastLoginAt: Date.now(),
+      })
+      const patched = await ctx.db.get(userByEmail._id)
+      return patched
+    }
     
     // Se l'utente non esiste, verifica se abbiamo una clinica di default
     const defaultClinic = await ctx.db
