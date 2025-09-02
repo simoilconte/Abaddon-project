@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { useRole } from '@/providers/RoleProvider'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -107,9 +108,17 @@ const priorityLabels = {
 }
 
 export default function DashboardPage() {
-  const { user } = useRole()
+  const { role, user } = useRole()
+  const router = useRouter()
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
+
+  // Redirect agenti alla dashboard specializzata
+  useEffect(() => {
+    if (role === 'agent') {
+      router.push('/dashboard/agent')
+    }
+  }, [role, router])
 
   const myTickets = mockTickets.filter(ticket =>
     ticket.assignee === 'Te' || ticket.assignee === user.name
