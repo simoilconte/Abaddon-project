@@ -23,7 +23,7 @@ interface RoleProviderProps {
 
 export function RoleProvider({
   children,
-  initialRole = 'user'
+  initialRole = 'agent' // Cambio default per testare la dashboard agente
 }: RoleProviderProps) {
   const [role, setRole] = useState<UserRole>(initialRole);
 
