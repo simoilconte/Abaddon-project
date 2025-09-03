@@ -20,6 +20,7 @@ import type * as departments from "../departments.js";
 import type * as init from "../init.js";
 import type * as lib_utils from "../lib/utils.js";
 import type * as roles from "../roles.js";
+import type * as tags from "../tags.js";
 import type * as users from "../users.js";
 
 /**
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   init: typeof init;
   "lib/utils": typeof lib_utils;
   roles: typeof roles;
+  tags: typeof tags;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

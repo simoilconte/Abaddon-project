@@ -77,17 +77,60 @@ export default defineSchema({
   // Categories table
   categories: defineTable({
     name: v.string(),
+    slug: v.string(),                  // univoco per ricerca/URL
     description: v.optional(v.string()),
     clinicId: v.id("clinics"),
     departmentId: v.optional(v.id("departments")),
     visibility: v.union(v.literal("public"), v.literal("private")),
     requiresApproval: v.boolean(),
     isActive: v.boolean(),
+
+    // Albero gerarchico
+    parentId: v.optional(v.id("categories")), // root = undefined
+    path: v.array(v.id("categories")),        // antenati in ordine (per query veloci)
+    depth: v.number(),                        // 0=root, 1=child...
+    order: v.number(),                        // ordinamento tra siblings
+
+    // AI / metadata per future funzionalità
+    synonyms: v.array(v.string()),            // alias/termini simili per NLP
   })
     .index("by_clinic", ["clinicId"])
     .index("by_department", ["departmentId"])
     .index("by_visibility", ["visibility"])
-    .index("by_clinic_visibility", ["clinicId", "visibility"]),
+    .index("by_clinic_visibility", ["clinicId", "visibility"])
+    .index("by_parent", ["parentId"])
+    .index("by_slug", ["clinicId", "slug"])
+    .index("by_active", ["isActive"]),
+
+  // Tags table
+  tags: defineTable({
+    name: v.string(),
+    slug: v.string(),                  // univoco per ricerca/URL
+    description: v.optional(v.string()),
+    clinicId: v.id("clinics"),
+    categoryId: v.optional(v.id("categories")), // tag specifico per categoria
+    color: v.optional(v.string()),     // colore hex per UI
+    isActive: v.boolean(),
+    usageCount: v.number(),            // contatore utilizzo
+    
+    // AI / metadata
+    synonyms: v.array(v.string()),     // termini simili per NLP
+    aiGenerated: v.boolean(),          // creato da AI o manualmente
+  })
+    .index("by_clinic", ["clinicId"])
+    .index("by_category", ["categoryId"])
+    .index("by_slug", ["clinicId", "slug"])
+    .index("by_active", ["isActive"])
+    .index("by_usage", ["usageCount"]),
+
+  // Ticket-Tag relationships (many-to-many)
+  ticketTags: defineTable({
+    ticketId: v.id("tickets"),
+    tagId: v.id("tags"),
+  })
+    .index("by_ticket", ["ticketId"])
+    .index("by_tag", ["tagId"])
+    .index("by_ticket_tag", ["ticketId", "tagId"]),
 
   // Tickets table
   tickets: defineTable({

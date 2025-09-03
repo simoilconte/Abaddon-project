@@ -15,6 +15,7 @@ import {
   Clock,
   UserCog,
   X,
+  Tags,
 
 } from 'lucide-react'
 import Link from 'next/link'
@@ -50,6 +51,7 @@ const agentNavigation: NavItem[] = [
 ]
 
 const adminNavigation: NavItem[] = [
+  { name: 'Gestione Categorie', href: '/admin/categories', icon: Tags, roles: ['admin'] },
   { name: 'Gestione Utenti', href: '/admin/users', icon: Users, roles: ['admin'] },
   { name: 'Cliniche', href: '/admin/clinics', icon: Building2, roles: ['admin'] },
   { name: 'Ruoli e Permessi', href: '/admin/roles', icon: UserCog, roles: ['admin'] },
